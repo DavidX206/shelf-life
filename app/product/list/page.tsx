@@ -14,9 +14,10 @@ export default function ProductList() {
     { name: 'Cheese', quantity: '200 gr', expiryDate: 'Expires in 10 days', category: 'Dairy' },
   ]);
 
-  const categories = ['Produce', 'Meat & Poultry', 'Dairy', 'Condiments'];
+  const categories = ['All', 'Produce', 'Meat', 'Dairy', 'Condiments'];
 
-  const filteredProducts = products.filter(product => product.category === selectedCategory);
+  const filteredProducts = selectedCategory==='All' ? products :
+  products.filter(product => product.category === selectedCategory);
 
   const handleAddProduct = () => {
     // Navigate to Add Product page or open modal
@@ -26,7 +27,7 @@ export default function ProductList() {
   return (
     <div className="bg-white h-screen flex flex-col">
       <div className="flex-1 overflow-y-auto p-4">
-        <h1 className="text-2xl font-bold mb-4">myfridge</h1>
+        <h1 className="text-2xl font-bold mb-4">Products</h1>
         
         <div className="flex space-x-4 mb-6 overflow-x-auto overflow-hidden">
           {categories.map(category => (

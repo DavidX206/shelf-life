@@ -2,12 +2,13 @@
 "use client"
 import { useState } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
-import { ChevronDownIcon, Calendar, ChevronLeftIcon } from 'lucide-react';
-// import { createClient } from '@supabase/supabase-js';
-// import { db } from '@/utils/firebase/client';
-// import { doc, addDoc, collection } from 'firebase/firestore';
-// import {getAuth} from "firebase/auth"
+import { ChevronDownIcon, Calendar, ChevronLeftIcon, Upload } from 'lucide-react';
+import { db } from '../../../utils/firebase';
+import { doc, setDoc, collection } from 'firebase/firestore';
+import {getAuth} from "firebase/auth"
 import Link from "next/link"
+import Image from 'next/image';
+import { ProductValues } from '@/types/types';
 
 const supabaseUrl = 'YOUR_SUPABASE_URL';
 const supabaseAnonKey = 'YOUR_SUPABASE_ANON_KEY';
@@ -15,6 +16,7 @@ const supabaseAnonKey = 'YOUR_SUPABASE_ANON_KEY';
 // const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function AddProduct() {
+    const [loading, setLoading] = useState(false)
   
   const { control, handleSubmit, watch, register, reset } = useForm({
     defaultValues: {
@@ -26,24 +28,28 @@ export default function AddProduct() {
     },
   });
 
-//   const clientAuth = getAuth();
-//   const user = clientAuth.currentUser;
+  const clientAuth = getAuth();
+  const user = clientAuth.currentUser;
 
-//   const onSubmit = async (data: BudgetValues) => {
-//     setLoading(true);
-//     try {
+  const onSubmit = async (data: ProductValues) => {
+    setLoading(true);
+    console.log("category: ", data.productCategory)
+    try {
+      const storeId = 'mL1vypvgas89boUL6ohg';
+      const inventoryRef = doc(db, "store", storeId);
+      const meatPoultryRef = doc(inventoryRef, "inventory", data.productCategory);
+      const budgetRef = await setDoc(meatPoultryRef, data, {merge: true});
 
-//       const budgetRef = await addDoc(collection(doc(db, "User", user!.uid), "budgets"), data);
-
-//       console.log("Document written with ID: ", budgetRef.id);
-//       alert('Budget Created Successfully');
-//       reset();
-//     } catch (error) {
-//       console.error('Error adding document: ', error);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
+    //   console.log("Document written with ID: ", budgetRef.id);
+      alert('Product Added Successfully');
+      reset();
+    } catch (error) {
+      alert('product not added');
+      console.error('Error adding document: ', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="bg-white p-6 rounded-lg shadow">
@@ -53,23 +59,41 @@ export default function AddProduct() {
       </Link>
         <h2 className="text-xl font-extrabold ml-2">Add product</h2>
     </div>
-    <form className='flex flex-col mt-4'>
+    <form className='flex flex-col mt-4' onSubmit={handleSubmit(onSubmit)}>
         <div className="mb-6">
           <label className="block text-sm font-bold text-teal-500 mb-1">Product Name</label>
-          <div className="relative shadow-sm">
-            <Controller
-              name="productName"
-              control={control}
-              render={({ field }) => (
-                  <input
-                  {...field}
-                  type="text"
-                  placeholder="Chicken Breast"
-                  className="w-full py-3.5 px-5 text-sm bg-gray-200"
-                  />
-              )}
-              />
-          </div>
+          <section className='flex w-full justify-between md:justify-center'>
+            <div className="grid gap-2">
+                <Image
+                    alt="Product image"
+                    className="aspect-square w-full rounded-md object-cover bg-gray-200"
+                    height="300"
+                    src="/placeholder.svg"
+                    width="300"
+                />
+                <div className="grid grid-cols-3 gap-2">
+                    <button className="flex aspect-square w-full items-center justify-center rounded-md border border-dashed">
+                    <Upload className="h-4 w-4 text-muted-foreground" />
+                    <span className="sr-only">Upload</span>
+                    </button>
+                </div>
+            </div>
+
+            <div className="relative shadow-sm w-2/3 md:w-[50%] md:ml-4 self-center">
+                <Controller
+                    name="productName"
+                    control={control}
+                    render={({ field }) => (
+                        <input
+                        {...field}
+                        type="text"
+                        placeholder="Chicken Breast"
+                        className="w-full py-3.5 px-5 text-sm bg-gray-200"
+                        />
+                    )}
+                />
+            </div>
+          </section>
         </div>
 
         <div className="mb-6">
@@ -79,12 +103,12 @@ export default function AddProduct() {
               name="productCategory"
               control={control}
               render={({ field }) => (
-                  <select
-                  {...field}
-                  className="w-full py-3.5 px-5 bg-gray-200 text-sm appearance-none">
-                      <option>Meat & Poultry</option>
-                      {/* Add other categories */}
-                  </select>
+                <input
+                {...field}
+                type="text"
+                placeholder="Meat"
+                className="w-full py-3.5 px-5 text-sm bg-gray-200"
+                />
               )}
               />
             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -165,8 +189,8 @@ export default function AddProduct() {
         </div>
         
         <section className='flex justify-center'>
-          <button type="submit" className="md:w-full w-1/2 bg-teal-500 text-white py-3 px-4 rounded-2xl text-lg font-semibold">
-            Save
+          <button type="submit" className="md:w-full w-1/2 bg-teal-500 text-white py-3 px-4 rounded-2xl text-lg font-semibold" aria-disabled={loading}>
+            {loading ? 'Loading' : 'Save'}
           </button>
         </section>
     </form>
