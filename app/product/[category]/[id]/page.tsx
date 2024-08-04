@@ -7,16 +7,17 @@ import { ChevronLeftIcon } from 'lucide-react';
 import Link from "next/link";
 import { ProductValues } from '@/types/types';
 
-export default function ProductDetails() {
+export default function ProductDetails({params}: {params: {id: string, category: string}}) {
   const [product, setProduct] = useState<ProductValues | null>(null);
   const [loading, setLoading] = useState(true);
   const search = useSearchParams();
-  const id = search.get('id');
-  const category = search.get('category')
+  const id = (params.id).replace(/%20/g, " ")
+  const category = (params.category).replace(/%20/g, " ")
 
   useEffect(() => {
     async function fetchProduct() {
     console.log('just started')
+    console.log(id, category)
       if (id && category) {
         try {
           const storeId = 'mL1vypvgas89boUL6ohg';
@@ -28,6 +29,7 @@ export default function ProductDetails() {
             const singleObject = Object.entries(productSnap.data()).find(([key, obj]) => obj.productName===id) as [string, ProductValues];
             const [key, value] = singleObject;
             setProduct(value);
+            console.log("Found document")
           } else {
             console.log("No such document!");
           }
@@ -79,10 +81,10 @@ export default function ProductDetails() {
         <p className="text-gray-700">{`${product.size.number} ${product.size.unit}`}</p>
       </div>
 
-      <div className="mb-6">
+      {product.expiryDate && <div className="mb-6">
         <h3 className="text-lg font-bold text-teal-500">Expiry Date</h3>
         <p className="text-gray-700">{new Date(product.expiryDate).toLocaleDateString()}</p>
-      </div>
+      </div>}
 
       <div className="flex justify-around mt-8">
         <Link href={`/product/edit/${id}`}>

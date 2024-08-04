@@ -90,6 +90,7 @@ export default function ProductList() {
               </div>
               <h3 className="font-semibold text-center mb-1">{product.productName}</h3>
               <p className="text-sm text-gray-600 mb-2">{product.quantity}</p>
+              {product.expiryDate && <p className="text-xs text-red-500">Expires in {product.expiryDate} days</p>}
           </Link>
           ))}
         </div>
