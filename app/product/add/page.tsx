@@ -38,7 +38,7 @@ export default function AddProduct() {
       const storeId = 'mL1vypvgas89boUL6ohg';
       const inventoryRef = doc(db, "store", storeId);
       const meatPoultryRef = doc(inventoryRef, "inventory", data.productCategory);
-      const budgetRef = await setDoc(meatPoultryRef, data, {merge: true});
+      const budgetRef = await setDoc(meatPoultryRef, {[data.productName]: data}, {merge: true});
 
     //   console.log("Document written with ID: ", budgetRef.id);
       alert('Product Added Successfully');
